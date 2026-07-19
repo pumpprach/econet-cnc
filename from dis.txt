@@ -1,0 +1,64 @@
+ทดสอบพฤติกรรมของระบบภายใต้โหลดที่เพิ่มขึ้น โดยดูผลของ:
+
+จำนวน request (100k → 1M)
+ขนาด packet (0 → 200 bytes)
+throughput (requests/sec)
+
+เพื่อหาขีดจำกัดของระบบ (saturation point)
+
+📌 ผลลัพธ์หลักที่พบ
+1) 🚀 ระบบมี “เพดานประสิทธิภาพ” ชัดเจน
+
+ระบบสามารถรองรับได้ประมาณ:
+
+🔥 ~47,000 – 53,000 requests/sec
+
+และจะ “ไม่เพิ่มขึ้นอีก” แม้เพิ่มโหลด
+
+👉 หมายความว่า:
+
+เพิ่ม request จาก 100k → 1,000,000
+throughput ไม่เพิ่มแล้ว
+ระบบเข้าสู่จุดอิ่มตัว (saturation)
+
+
+2) 📦 ขนาด packet แทบไม่มีผลต่อ performance
+
+ทดสอบ packet size:
+
+0 bytes
+50 bytes
+100 bytes
+200 bytes
+
+ผลลัพธ์:
+
+throughput แทบไม่เปลี่ยน (ยังอยู่ ~45k–53k RPS)
+
+👉 สรุป:
+
+ระบบไม่ได้ติด bandwidth
+แต่ติด processing / CPU / overhead
+
+
+3) ⚙️ ระบบต้อง “warm-up” ก่อนเสถียร
+
+เมื่อใช้ request ต่ำ (100k):
+throughput ยังไม่นิ่ง (~20k RPS)
+แต่เมื่อเพิ่มเป็น:
+500k – 1M requests
+
+👉 ระบบเข้าสู่ steady-state:
+
+throughput คงที่ ~50k RPS
+
+4) 🧠 ระบบเป็น CPU-bound ไม่ใช่ memory-bound
+
+จาก monitoring (docker stats):
+
+CPU บาง container ขึ้นถึง 100%
+memory ใช้ต่ำมาก (~1–3%)
+
+👉 สรุป:
+
+bottleneck หลักคือ CPU ไม่ใช่ memory หรือ network
